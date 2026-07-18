@@ -1,0 +1,27 @@
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently --names \"API,WEB\" --prefix-colors \"blue,green\" \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npm run dev --workspace=packages/api",
+    "dev:web": "npm run dev --workspace=packages/web",
+    "build": "npm run build --workspace=packages/shared && npm run build --workspace=packages/api && npm run build --workspace=packages/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspace=packages/api",
+    "test:integration": "npm run test:integration --workspace=packages/api",
+    "test:coverage": "npm run test:coverage --workspace=packages/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0", 
+    "@typescript-eslint/parser": "^8.0.0",       
+    "concurrently": "^8.2.2",
+    "eslint": "^9.6.0",
+    "typescript": "^5.5.3"
+  }
+}

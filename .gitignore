@@ -1,0 +1,21 @@
+# Dependencies — never commit, reinstall with npm ci
+node_modules/
+
+# Build output — generated, not source
+dist/
+build/
+coverage/
+
+# Environment files — SECRETS LIVE HERE, never commit
+.env
+.env.local
+.env.*.local
+
+# OS clutter
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.idea/
+.vscode/
+*.swp

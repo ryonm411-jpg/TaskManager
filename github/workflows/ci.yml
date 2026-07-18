@@ -1,0 +1,79 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: myapp_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # npm ci uses package-lock.json exactly — reproducible across machines
+          cache: 'npm'
+
+      # npm ci is correct here — not npm install
+      # ci = clean install: respects package-lock.json, never upgrades packages silently
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      # shared must be compiled before api or web can import from it
+      - name: Build shared package
+        run: npm run build --workspace=packages/shared
+
+      - name: Initialize database schema
+        run: PGPASSWORD=password psql -h localhost -U postgres -d myapp_dev -f schema.sql
+
+      # --coverage triggers the thresholds in vitest.config.ts
+      # If coverage drops below 70%, this step exits with an error and blocks the merge
+      - name: Run unit tests with coverage
+        run: npm run test:unit -- --coverage
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: password
+          DB_NAME: myapp_dev
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: password
+          DB_NAME: myapp_dev
+
+      - name: Build all packages
+        run: npm run build
+
+      # if: always() uploads the report even when tests fail — you need it most then
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: packages/api/coverage/
