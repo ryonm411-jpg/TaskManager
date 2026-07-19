@@ -27,29 +27,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          # npm ci uses package-lock.json exactly — reproducible across machines
           cache: 'npm'
 
-      # npm ci is correct here — not npm install
-      # ci = clean install: respects package-lock.json, never upgrades packages silently
+      # 1. Download dependencies first so tooling is available
       - name: Install dependencies
         run: npm ci
 
+      # 2. Build the shared package next so api can resolve its types
+      - name: Build shared package
+        run: npm run build --workspace=packages/shared
+
+      # 3. Code quality inspections
       - name: Lint
         run: npm run lint
 
       - name: Type check
         run: npm run type-check
 
-      # shared must be compiled before api or web can import from it
-      - name: Build shared package
-        run: npm run build --workspace=packages/shared
-
+      # 4. Database migrations & schemas
       - name: Initialize database schema
         run: PGPASSWORD=password psql -h localhost -U postgres -d taskmanager_test -f schema.sql
 
-      # --coverage triggers the thresholds in vitest.config.ts
-      # If coverage drops below 70%, this step exits with an error and blocks the merge
+      # 5. Execute automated test suites
       - name: Run unit tests with coverage
         run: npm run test:unit -- --coverage
         env:
@@ -68,10 +67,11 @@ jobs:
           DB_PASSWORD: password
           DB_NAME: taskmanager_test
 
+      # 6. Verify final production bundlers compile cleanly
       - name: Build all packages
         run: npm run build
 
-      # if: always() uploads the report even when tests fail — you need it most then
+      # 7. Upload report even if prior test stages failed
       - uses: actions/upload-artifact@v4
         if: always()
         with:
