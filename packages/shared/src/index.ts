@@ -20,7 +20,7 @@ export type CreateTaskInput = {
   description?: string;
   status?: Task['status'];
   priority?: Task['priority'];
-  dueDate?: string;
+  dueDate?: string | null;
 };
 
 export type UpdateTaskInput = Partial<CreateTaskInput>;
@@ -35,5 +35,14 @@ export const CreateTaskSchema = z.object({
   dueDate: z.string().date('Must be a valid date (YYYY-MM-DD)').optional(),
 });
 
+export const UpdateTaskSchema = z.object({
+  title: z.string().min(1).max(255).optional(),
+  description: z.string().optional(),
+  status: z.enum(['todo', 'in-progress', 'done']).optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional(),
+  dueDate: z.string().date().optional().nullable(),
+}).strict();
+
 
 export type CreateTaskSchemaType = z.infer<typeof CreateTaskSchema>;
+export type UpdateTaskSchemaType = z.infer<typeof UpdateTaskSchema>;
