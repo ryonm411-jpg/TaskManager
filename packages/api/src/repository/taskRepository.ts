@@ -1,5 +1,5 @@
 import type { Task, CreateTaskInput, UpdateTaskInput } from '@workspace/shared';
-import pool from '../config/db.js'; // 1. Added .js extension
+import pool from '../config/db.js'; 
 
 export class TaskRepository {
   
@@ -103,7 +103,7 @@ export class TaskRepository {
   }
 
  
-  async delete(id: number): Promise<boolean> {
+  async deleteTask(id: number): Promise<boolean> {
     const result = await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
     return (result.rowCount ?? 0) > 0;
   }

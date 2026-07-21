@@ -1,5 +1,5 @@
 import type { Task, CreateTaskInput, UpdateTaskInput } from '@workspace/shared';
-import { TaskRepository } from '../repository/taskRepository'; 
+import { TaskRepository } from '../repository/taskRepository.js'; 
 
 export class TaskService {
  
@@ -30,6 +30,6 @@ export class TaskService {
   };
 
   async deleteTask(id: number): Promise<boolean> {
-    return this.repo.delete(id);
+    return this.repo.deleteTask(id);
   }
 };
