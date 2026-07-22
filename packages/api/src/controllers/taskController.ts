@@ -94,7 +94,7 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
             res.status(404).json({ error: 'Task not found' });
             return;
         }
-        res.json(deletedTask);
+        res.status(204).send();
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         res.status(500).json({ error: message });
