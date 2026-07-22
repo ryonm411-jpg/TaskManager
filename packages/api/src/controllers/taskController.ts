@@ -69,7 +69,7 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
     }
     try {
 
-        
+
         const updatedTask = await taskService.update(id, validation.data);
         if (!updatedTask) {
             res.status(404).json({ error: 'Task not found' });

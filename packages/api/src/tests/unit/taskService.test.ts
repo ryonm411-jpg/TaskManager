@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TaskService } from '../../service/taskService.js'; // Fixed plural path
+import { TaskService } from '../../service/taskService.js';
 
 
 vi.mock('../../repository/taskRepository.js', () => ({
