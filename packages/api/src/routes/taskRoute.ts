@@ -8,3 +8,4 @@ taskRoutes.get('/tasks/:id', taskController.getTaskById);
 taskRoutes.post('/tasks', taskController.createTask);
 taskRoutes.put('/tasks/:id', taskController.updateTask);
 taskRoutes.delete('/tasks/:id', taskController.deleteTask);
+taskRoutes.post('/tasks/:id/summarise', taskController.summariseTask);

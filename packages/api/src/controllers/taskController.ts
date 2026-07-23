@@ -2,6 +2,8 @@ import { TaskService } from '../service/taskService.js';
 import { Request, Response } from 'express';
 import { CreateTaskSchema, UpdateTaskSchema } from '@workspace/shared';
 
+
+
 const taskService = new TaskService();
 
 export const getAllTasks = async (req: Request, res: Response): Promise<void> => {
@@ -98,5 +100,21 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         res.status(500).json({ error: message });
+    }
+}
+
+export const summariseTask = async (req: Request, res: Response): Promise<void> => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+        res.status(400).json({ message: 'Invalid task ID' });
+        return;
+    }
+    try {
+        const summary = await taskService.summariseTask(id);
+        res.json({ summary});
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        const status = message === 'Task not found' ? 404 : 502;
+        res.status(status).json({ message });
     }
 }
