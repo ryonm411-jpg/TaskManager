@@ -2,10 +2,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskService } from '../../service/taskService.js';
 
+const { mockMessagesCreate } = vi.hoisted(() => ({
+  mockMessagesCreate: vi.fn(),
+}));
+
 vi.mock('@anthropic-ai/sdk', () => ({
   default: vi.fn().mockImplementation(() => ({
     messages: {
-      create: vi.fn(),
+      create: mockMessagesCreate,
     },
   })),
 }));
@@ -149,9 +153,7 @@ describe('TaskService Unit Tests', () => {
   describe('summariseTask', () => {
     it('should return a one-sentence summary from Claude', async () => {
       mockRepo.getTaskById.mockResolvedValue(mockTask);
-      const { default: Anthropic } = await import('@anthropic-ai/sdk');
-      const mockCreate = vi.mocked(new (Anthropic as any)()).messages.create;
-      mockCreate.mockResolvedValue({
+      mockMessagesCreate.mockResolvedValue({
         content: [{ type: 'text', text: 'A high-priority task to write tests.' }],
       });
       const result = await taskService.summariseTask(1);
