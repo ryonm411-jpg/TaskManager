@@ -36,4 +36,12 @@ export async function deleteTask(id: number): Promise<void> {
   return handleResponse<void>(await fetch(`${API_BASE}/tasks/${id}`, {
     method: 'DELETE',
   }));
+
+}
+
+export async function summariseTask(id: number): Promise<string> {
+  const res = await fetch(`${API_BASE}/tasks/${id}/summarise`, { method: 'POST' });
+  const body = await res.json() as { summary?: string; message?: string };
+  if (!res.ok) throw new Error(body.message ?? 'Failed to summarise');
+  return body.summary!;
 }

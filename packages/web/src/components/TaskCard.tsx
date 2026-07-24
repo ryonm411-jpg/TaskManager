@@ -4,6 +4,7 @@ import { StatusBadge } from './StatusBadge';
 import { PriorityBadge } from './PriorityBadge';
 import { ConfirmDialog } from './ConfirmDialog';
 import { TaskForm } from './TaskForm';
+import { summariseTask } from '../api/tasksApi';
 
 interface Props {
   task: Task;
@@ -12,8 +13,12 @@ interface Props {
 }
 
 export function TaskCard({ task, onUpdate, onDelete }: Props) {
-  const [isEditing, setEditing]     = useState(false);
-  const [isDeleting, setDeleting]   = useState(false);
+  const [isEditing, setEditing] = useState(false);
+  const [isDeleting, setDeleting] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summarising, setSumm] = useState(false);
+  const [summaryError, setSummErr] = useState<string | null>(null);
+
 
   const handleUpdate = async (input: UpdateTaskInput) => {
     await onUpdate(task.id, input);
@@ -23,6 +28,18 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
   const handleDelete = async () => {
     await onDelete(task.id);
     setDeleting(false);
+  };
+
+  const handleSummarise = async () => {
+    setSumm(true); setSummErr(null);
+    try {
+      const text = await summariseTask(task.id);
+      setSummary(text);
+    } catch (err) {
+      setSummErr(err instanceof Error ? err.message : 'Error');
+    } finally {
+      setSumm(false);
+    }
   };
 
   if (isEditing) {
@@ -54,6 +71,11 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
               className="text-xs text-blue-600 hover:underline">Edit</button>
             <button onClick={() => setDeleting(true)} data-testid={`delete-task-${task.id}`}
               className="text-xs text-red-600 hover:underline">Delete</button>
+            <button onClick={handleSummarise} disabled={summarising}
+              className="text-xs text-purple-600 hover:underline disabled:opacity-50">
+              {summarising ? 'Summarising...' : 'Summarise'}
+            </button>
+
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
@@ -63,6 +85,8 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
             <span className="text-xs text-slate-400 ml-auto">Due {task.dueDate}</span>
           )}
         </div>
+        {summary && <p className="mt-2 text-sm italic text-slate-500 border-t pt-2">{summary}</p>}
+        {summaryError && <p className="mt-1 text-xs text-red-500">{summaryError}</p>}
       </div>
 
       {isDeleting && (
