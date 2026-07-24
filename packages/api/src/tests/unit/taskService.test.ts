@@ -2,6 +2,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskService } from '../../service/taskService.js';
 
+vi.mock('@anthropic-ai/sdk', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    messages: {
+      create: vi.fn(),
+    },
+  })),
+}));
+
+
+
 
 vi.mock('../../repository/taskRepository.js', () => ({
   TaskRepository: vi.fn().mockImplementation(() => ({
@@ -43,7 +53,7 @@ describe('TaskService Unit Tests', () => {
   describe('create', () => {
     it('should create a new task and return the task object', async () => {
       const input = { title: 'shush' };
-      
+
       mockRepo.createTask.mockResolvedValue(mockTask);
 
       const task = await taskService.create(input);
@@ -78,7 +88,7 @@ describe('TaskService Unit Tests', () => {
       );
       expect(mockRepo.getAllTasks).not.toHaveBeenCalled();
     });
-  }); 
+  });
 
   describe('getTaskById', () => {
     it('should return the task with the given ID', async () => {
@@ -135,4 +145,22 @@ describe('TaskService Unit Tests', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('summariseTask', () => {
+    it('should return a one-sentence summary from Claude', async () => {
+      mockRepo.getTaskById.mockResolvedValue(mockTask);
+      const { default: Anthropic } = await import('@anthropic-ai/sdk');
+      const mockCreate = vi.mocked(new (Anthropic as any)()).messages.create;
+      mockCreate.mockResolvedValue({
+        content: [{ type: 'text', text: 'A high-priority task to write tests.' }],
+      });
+      const result = await taskService.summariseTask(1);
+      expect(result).toBe('A high-priority task to write tests.');
+    });
+    it('should throw when the task does not exist', async () => {
+      mockRepo.getTaskById.mockResolvedValue(null);
+      await expect(taskService.summariseTask(999)).rejects.toThrow('Task not found');
+    });
+  });
+
 });
