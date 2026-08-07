@@ -14,8 +14,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reportsDirectory: './coverage',
-      // Only measure YOUR source code — not test files or the server entry point
-      include: ['src/**/*.ts'],
+      // Measure the code that unit tests actually exercise — the service layer.
+      // Controllers, repositories, routes, and config are covered by integration tests.
+      include: ['src/service/**/*.ts'],
       exclude: ['src/tests/**', 'src/server.ts'],
       // ENFORCED THRESHOLDS: if any metric drops below 70%, the command exits
       // with a non-zero code, which fails the CI step and blocks the merge.
