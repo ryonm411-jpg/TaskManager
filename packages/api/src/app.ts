@@ -1,9 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { taskRoutes } from './routes/taskRoute.js'; 
-// Load .env file — must happen before anything reads process.env
-dotenv.config();
+
+// Resolve .env relative to this file (packages/api/src/app.ts → packages/api/.env)
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 
 const app = express();
 
