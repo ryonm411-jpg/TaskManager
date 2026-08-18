@@ -50,7 +50,7 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
         const newTask = await taskService.create(validatedTask.data);
         res.status(201).json(newTask);
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message = error instanceof Error ? error.message : 'Unknown error for taskService.create';
         res.status(500).json({ error: message });
     }
 };
